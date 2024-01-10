@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 bool is_running = false;
 
@@ -115,7 +115,11 @@ void destroy_window(void)
     SDL_Quit();
 }
 
+#if WIN32
+int SDL_main(int argc, char *argv[])
+#else
 int main(void)
+#endif
 {
     is_running = initialize_window();
 
