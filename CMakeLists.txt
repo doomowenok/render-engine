@@ -4,7 +4,9 @@ project(RenderEngine C)
 set(CMAKE_C_STANDARD 99)
 
 set(SOURCE_DIR Source)
-file(GLOB SOURCE_FILES ${SOURCE_DIR}/*.c)
+file(GLOB SOURCE_FILES
+        ${SOURCE_DIR}/*.c
+        ${SOURCE_DIR}/*.h)
 
 if (WIN32)
     set(CMAKE_PREFIX_PATH "C:/Library/SDL2-2.28.5/x86_64-w64-mingw32")
