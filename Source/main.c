@@ -120,12 +120,38 @@ void draw_grid(void)
     }
 }
 
+void draw_dots(void)
+{
+    for(int y = 0; y < window_height; y += 10)
+    {
+        for (int x = 0; x < window_width; x += 10)
+        {
+            color_buffer[(window_width * y) + x] = 0xFF333333;
+        }
+    }
+}
+
+void draw_rect(const int x, const int y, const int width, const int height, const uint32_t color)
+{
+    for(int i = 0; i < width; i++)
+    {
+        for (int k = 0; k < height; k++)
+        {
+            const int current_x = x + i;
+            const int current_y = y + k;
+            color_buffer[(window_width * current_y) + current_x] = color;
+        }
+    }
+}
+
 void render(void)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    draw_grid();
+    // draw_grid();
+    draw_dots();
+    draw_rect(300, 300, 200,200, 0xFF00FF);
     render_color_buffer();
     clear_color_buffer(0xFFFFFFFF);
 
