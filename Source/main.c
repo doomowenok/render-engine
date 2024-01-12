@@ -22,6 +22,12 @@ bool initialize_window(void)
         return false;
     }
 
+    SDL_DisplayMode display_mode;
+    SDL_GetCurrentDisplayMode(0, &display_mode);
+
+    window_height = display_mode.h;
+    window_width = display_mode.w;
+
     window = SDL_CreateWindow(
         NULL,
         SDL_WINDOWPOS_CENTERED,
@@ -44,6 +50,8 @@ bool initialize_window(void)
         fprintf(stderr, "Error creating SDL renderer.\n");
         return false;
     }
+
+    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 
     return true;
 }
@@ -74,6 +82,8 @@ void process_input(void)
             if (event.key.keysym.sym == SDLK_ESCAPE)
                 is_running = false;
             break;
+        default:
+            break;
     }
 }
 
@@ -96,13 +106,28 @@ void render_color_buffer(void)
     SDL_RenderCopy(renderer, color_buffer_texture, NULL, NULL);
 }
 
+void draw_grid(void)
+{
+    for(int y = 0; y < window_height; y++)
+    {
+        for (int x = 0; x < window_width; x++)
+        {
+            if(y % 10 == 0 || x % 10 == 0)
+            {
+                color_buffer[(window_width * y) + x] = 0xFF333333;
+            }
+        }
+    }
+}
+
 void render(void)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
+    draw_grid();
     render_color_buffer();
-    clear_color_buffer(0xFF0000FF);
+    clear_color_buffer(0xFFFFFFFF);
 
     SDL_RenderPresent(renderer);
 }
@@ -125,6 +150,7 @@ int main(void)
 
     setup();
 
+    // ReSharper disable once CppDFALoopConditionNotUpdated
     while (is_running)
     {
         process_input();
