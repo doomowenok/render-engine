@@ -3,6 +3,11 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include "display.h"
+#include "vector.h"
+
+#define N_POINTS (9 * 9 * 9)
+
+vec3_t cube_points[N_POINTS];
 
 bool is_running = false;
 
@@ -16,6 +21,20 @@ void setup(void)
         SDL_TEXTUREACCESS_STREAMING,
         window_width,
         window_height);
+
+    int point_count = 0;
+    for (float x = -1.0f; x <= 1.0f; x += 0.25f)
+    {
+        for (float y = -1.0f; y <= 1.0f; y += 0.25f)
+        {
+            for (float z = -1.0f; z <= 1.0f; z += 0.25f)
+            {
+                const vec3_t new_point = {.x = x, .y = y, .z = z};
+                cube_points[point_count] = new_point;
+                point_count++;
+            }
+        }
+    }
 }
 
 void process_input(void)
@@ -37,19 +56,8 @@ void process_input(void)
     }
 }
 
-void update(void) {}
-
-void draw_rect(const int x, const int y, const int width, const int height, const uint32_t color)
+void update(void)
 {
-    for(int i = 0; i < width; i++)
-    {
-        for (int k = 0; k < height; k++)
-        {
-            const int current_x = x + i;
-            const int current_y = y + k;
-            color_buffer[(window_width * current_y) + current_x] = color;
-        }
-    }
 }
 
 void render(void)
@@ -59,7 +67,7 @@ void render(void)
 
     // draw_grid();
     draw_dots();
-    draw_rect(300, 300, 200,200, 0xFF00FF);
+    draw_rect(300, 300, 200, 200, 0xFF00FF);
     render_color_buffer();
     clear_color_buffer(0xFFFFFFFF);
 
