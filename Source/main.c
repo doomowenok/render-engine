@@ -16,7 +16,7 @@ bool is_running = false;
 
 void setup(void)
 {
-    color_buffer = (uint32_t *) malloc(sizeof(uint32_t) * window_width * window_height);
+    color_buffer = (uint32_t*) malloc(sizeof(uint32_t) * window_width * window_height);
 
     color_buffer_texture = SDL_CreateTexture(
         renderer,
@@ -61,13 +61,13 @@ void process_input(void)
 
 vec2_t porject(const vec3_t point)
 {
-    const vec2_t projected_point = { fov_factor * point.x, fov_factor * point.y };
+    const vec2_t projected_point = {fov_factor * point.x, fov_factor * point.y};
     return projected_point;
 }
 
 void update(void)
 {
-    for(int i = 0; i < N_POINTS; i++)
+    for (int i = 0; i < N_POINTS; i++)
     {
         projected_points[i] = porject(cube_points[i]);
     }
@@ -80,7 +80,7 @@ void render(void)
     const int translate_x = window_width / 2;
     const int translate_y = window_height / 2;
 
-    for(int i = 0; i < N_POINTS; i++)
+    for (int i = 0; i < N_POINTS; i++)
     {
         vec2_t projected_point = projected_points[i];
         draw_rect(projected_point.x + translate_x, projected_point.y + translate_y, 4, 4, 0xFFFFFF00);
@@ -93,7 +93,7 @@ void render(void)
 }
 
 #if WIN32
-int SDL_main(int argc, char *argv[])
+int SDL_main(int argc, char* argv[])
 #else
 int main(void)
 #endif
