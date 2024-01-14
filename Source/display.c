@@ -63,7 +63,8 @@ void render_color_buffer(void)
 
 void draw_pixel(const int x, const int y, const uint32_t color)
 {
-    if (x < window_width && y < window_height)
+    if (x >= 0 && x < window_width
+        && y >= 0 && y < window_height)
     {
         color_buffer[(window_width * y) + x] = color;
     }
