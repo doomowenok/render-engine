@@ -4,21 +4,18 @@
 #include <SDL.h>
 #include "display.h"
 #include "vector.h"
+#include "mesh.h"
+#include "triangle.h"
 
-#define N_POINTS (9 * 9 * 9)
-
-vec3_t cube_points[N_POINTS];
-vec2_t projected_points[N_POINTS];
+triangle_t triangles_to_render[N_MESH_FACES];
 
 vec3_t camera_position = { 0, 0, -5.0f };
-
 vec3_t cube_rotation = { 0, 0, 0 };
 
 float fov_factor = 640.0f;
 
 bool is_running = false;
-Uint32 previous_frame_time = 0;
-
+uint previous_frame_time = 0;
 
 void setup(void)
 {
@@ -30,20 +27,6 @@ void setup(void)
         SDL_TEXTUREACCESS_STREAMING,
         window_width,
         window_height);
-
-    int point_count = 0;
-    for (float x = -1.0f; x <= 1.0f; x += 0.25f)
-    {
-        for (float y = -1.0f; y <= 1.0f; y += 0.25f)
-        {
-            for (float z = -1.0f; z <= 1.0f; z += 0.25f)
-            {
-                const vec3_t new_point = {.x = x, .y = y, .z = z};
-                cube_points[point_count] = new_point;
-                point_count++;
-            }
-        }
-    }
 }
 
 void process_input(void)
@@ -90,18 +73,36 @@ void update(void)
     cube_rotation.y += 0.01f;
     cube_rotation.z += 0.01f;
 
-    for (int i = 0; i < N_POINTS; i++)
+    for(int i = 0; i < N_MESH_FACES; i++)
     {
-        const vec3_t cube_point = cube_points[i];
+        const face_t mesh_face = mesh_faces[i];
 
-        vec3_t transformed_point = vec3_rotate_x(cube_point, cube_rotation.x);
-        transformed_point = vec3_rotate_y(transformed_point, cube_rotation.y);
-        transformed_point = vec3_rotate_z(transformed_point, cube_rotation.z);
+        vec3_t face_vertices[3];
+        face_vertices[0] = mesh_verices[mesh_face.a - 1];
+        face_vertices[1] = mesh_verices[mesh_face.b - 1];
+        face_vertices[2] = mesh_verices[mesh_face.c - 1];
 
-        transformed_point.z -= camera_position.z;
+        triangle_t projected_triangle;
 
-        const vec2_t projected_point = project(transformed_point);
-        projected_points[i] = projected_point;
+        for(int j = 0; j < 3; j++)
+        {
+            vec3_t transformed_vertex = face_vertices[j];
+
+            transformed_vertex = vec3_rotate_x(transformed_vertex, cube_rotation.x);
+            transformed_vertex = vec3_rotate_y(transformed_vertex, cube_rotation.y);
+            transformed_vertex = vec3_rotate_z(transformed_vertex, cube_rotation.z);
+
+            transformed_vertex.z -= camera_position.z;
+
+            vec2_t projected_point = project(transformed_vertex);
+
+            projected_point.x += (window_width / 2);
+            projected_point.y += (window_height / 2);
+
+            projected_triangle.points[j] = projected_point;
+        }
+
+        triangles_to_render[i] = projected_triangle;
     }
 }
 
@@ -109,13 +110,14 @@ void render(void)
 {
     draw_dots();
 
-    const int translate_x = window_width / 2;
-    const int translate_y = window_height / 2;
-
-    for (int i = 0; i < N_POINTS; i++)
+    for (int i = 0; i < N_MESH_FACES; i++)
     {
-        vec2_t projected_point = projected_points[i];
-        draw_rect(projected_point.x + translate_x, projected_point.y + translate_y, 4, 4, 0xFFFFFF00);
+        const triangle_t triangle = triangles_to_render[i];
+
+        for(int j = 0; j < 3; j++)
+        {
+            draw_rect(triangle.points[j].x, triangle.points[j].y, 3, 3, 0xFFFFFF00);
+        }
     }
 
     render_color_buffer();

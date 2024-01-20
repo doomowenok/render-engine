@@ -1,6 +1,3 @@
-//
-// Created by zerof on 1/12/2024.
-//
 #include <stdio.h>
 #include "display.h"
 
