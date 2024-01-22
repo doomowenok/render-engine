@@ -15,7 +15,7 @@ vec3_t cube_rotation = { 0, 0, 0 };
 float fov_factor = 640.0f;
 
 bool is_running = false;
-uint previous_frame_time = 0;
+int previous_frame_time = 0;
 
 void setup(void)
 {
@@ -118,6 +118,8 @@ void render(void)
         {
             draw_rect(triangle.points[j].x, triangle.points[j].y, 3, 3, 0xFFFFFF00);
         }
+
+        draw_triangle(&triangle, 0xFFFFFF00);
     }
 
     render_color_buffer();

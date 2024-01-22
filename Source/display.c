@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include "display.h"
 
+#include <math.h>
+
+#include "triangle.h"
+
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
@@ -89,6 +93,42 @@ void draw_dots(void)
         {
             draw_pixel(x, y, 0xFF333333);
         }
+    }
+}
+
+void draw_line(const int x0, const int y0, const int x1, const int y1, const uint32_t color)
+{
+    const int delta_x = (x1 - x0);
+    const int delta_y = (y1 - y0);
+
+    const int longest_side_length = abs(delta_x) >= abs(delta_y) ? abs(delta_x) : abs(delta_y);
+
+    const float x_inc = delta_x / (float)longest_side_length;
+    const float y_inc = delta_y / (float)longest_side_length;
+
+    float current_x = x0;
+    float current_y = y0;
+
+    for(int i = 0; i < longest_side_length; i++)
+    {
+        draw_pixel(round(current_x), round(current_y), color);
+        current_x += x_inc;
+        current_y += y_inc;
+    }
+}
+
+void draw_triangle(const triangle_t* triangle, const uint32_t color)
+{
+    for(int j = 0; j < 3; j++)
+    {
+        int nextIndex = j + 1;
+
+        if(nextIndex == 3)
+        {
+            nextIndex = 0;
+        }
+
+        draw_line(triangle->points[j].x, triangle->points[j].y, triangle->points[nextIndex].x, triangle->points[nextIndex].y, color);
     }
 }
 
