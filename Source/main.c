@@ -27,7 +27,7 @@ void setup(void)
         window_width,
         window_height);
 
-    load_cube_mesh_data();
+    load_obj_file_data("../Assets/Plane.obj");
 }
 
 void process_input(void)
@@ -72,9 +72,9 @@ void update(void)
 
     triangles_to_render = NULL;
 
-    mesh.rotation.x += 0.01f;
-    mesh.rotation.y += 0.01f;
-    mesh.rotation.z += 0.01f;
+    mesh.rotation.x += 0.02f;
+    mesh.rotation.y += 0.00f;
+    mesh.rotation.z += 0.00f;
 
     for(int i = 0; i < array_length(mesh.faces); i++)
     {
