@@ -30,6 +30,14 @@ vec2_t vec2_div(const vec2_t v, const float factor)
     return result;
 }
 
+void vec2_normilize(vec2_t* v)
+{
+    const float length = vec2_length(*v);
+
+    v->x = v->x / length;
+    v->y = v->y / length;
+}
+
 float vec2_dot(const vec2_t a, const vec2_t b)
 {
     return a.x * b.x + a.y * b.y;
@@ -73,6 +81,15 @@ vec3_t vec3_cross(const vec3_t a, const vec3_t b)
         a.x * b.y - a.y * b.x
     };
     return result;
+}
+
+void vec3_normilize(vec3_t* v)
+{
+    const float length = vec3_length(*v);
+
+    v->x = v->x / length;
+    v->y = v->y / length;
+    v->z = v->z / length;
 }
 
 float vec3_dot(const vec3_t a, const vec3_t b)

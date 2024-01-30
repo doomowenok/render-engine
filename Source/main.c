@@ -100,18 +100,21 @@ void update(void)
             transformed_vertices[j] = transformed_vertex;
         }
 
-        vec3_t vector_a = transformed_vertices[0];
-        vec3_t vector_b = transformed_vertices[1];
-        vec3_t vector_c = transformed_vertices[2];
+        const vec3_t vector_a = transformed_vertices[0];
+        const vec3_t vector_b = transformed_vertices[1];
+        const vec3_t vector_c = transformed_vertices[2];
 
         vec3_t vector_ab = vec3_sub(vector_b, vector_a);
         vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+        vec3_normilize(&vector_ab);
+        vec3_normilize(&vector_ac);
 
         vec3_t normal = vec3_cross(vector_ab, vector_ac);
+        vec3_normilize(&normal);
 
-        vec3_t camera_ray = vec3_sub(camera_position, vector_a);
+        const vec3_t camera_ray = vec3_sub(camera_position, vector_a);
 
-        float dot_normal_camera = vec3_dot(normal, camera_ray);
+        const float dot_normal_camera = vec3_dot(normal, camera_ray);
 
         if(dot_normal_camera < 0.0f) continue;
 
