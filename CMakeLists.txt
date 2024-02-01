@@ -17,4 +17,5 @@ include_directories(${SDL2_INCLUDE_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES})
+# 'm' - math library.
+target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} m)
