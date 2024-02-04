@@ -106,11 +106,11 @@ void update(void)
 
         vec3_t vector_ab = vec3_sub(vector_b, vector_a);
         vec3_t vector_ac = vec3_sub(vector_c, vector_a);
-        vec3_normilize(&vector_ab);
-        vec3_normilize(&vector_ac);
+        vec3_normalize(&vector_ab);
+        vec3_normalize(&vector_ac);
 
         vec3_t normal = vec3_cross(vector_ab, vector_ac);
-        vec3_normilize(&normal);
+        vec3_normalize(&normal);
 
         const vec3_t camera_ray = vec3_sub(camera_position, vector_a);
 
@@ -138,17 +138,17 @@ void render(void)
 {
     draw_dots();
 
-    for (int i = 0; i < array_length(triangles_to_render); i++)
-    {
-        const triangle_t triangle = triangles_to_render[i];
-
-        for(int j = 0; j < 3; j++)
-        {
-            draw_rect(triangle.points[j].x, triangle.points[j].y, 3, 3, 0xFFFFFF00);
-        }
-
-        draw_triangle(&triangle, 0xFFFFFF00);
-    }
+//    for (int i = 0; i < array_length(triangles_to_render); i++)
+//    {
+//        const triangle_t triangle = triangles_to_render[i];
+//
+//        for(int j = 0; j < 3; j++)
+//        {
+//            draw_rect(triangle.points[j].x, triangle.points[j].y, 3, 3, 0xFFFFFF00);
+//        }
+//
+//        draw_triangle(&triangle, 0xFFFFFF00);
+//    }
 
     array_free(triangles_to_render);
 
