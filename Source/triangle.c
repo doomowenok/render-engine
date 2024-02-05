@@ -1,4 +1,26 @@
 #include "triangle.h"
+#include "display.h"
+
+void fill_flat_bottom_triangle(const triangle_t* triangle, uint32_t color)
+{
+    float inverse_slope1 = (triangle->points[1].x - triangle->points[0].x) / (triangle->points[1].y - triangle->points[0].y);
+    float inverse_slope2 = (triangle->points[2].x - triangle->points[0].x) / (triangle->points[2].y - triangle->points[0].y);
+
+    float x_start = triangle->points[0].x;
+    float x_end = triangle->points[0].x;
+
+    for(int i = triangle->points[0].y; i <= triangle->points[1].y; i++)
+    {
+        draw_line(x_start, i, x_end, i, color);
+        x_start += inverse_slope1;
+        x_end += inverse_slope2;
+    }
+}
+
+void fill_flat_top_triangle(const triangle_t* triangle)
+{
+
+}
 
 void sort_by_increase_y(triangle_t* triangle)
 {
@@ -87,6 +109,6 @@ void draw_filled_triangle(triangle_t* triangle, uint32_t color)
     bottom_triangle.points[2].x = sort_triangle.points[2].x;
     bottom_triangle.points[2].y = sort_triangle.points[2].y;
 
-    fill_flat_bottom_triangle();
-    fill_flat_top_triangle();
+    fill_flat_bottom_triangle(&top_triangle, color);
+    fill_flat_top_triangle(&bottom_triangle);
 }

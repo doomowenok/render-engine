@@ -150,6 +150,16 @@ void render(void)
 //        draw_triangle(&triangle, 0xFFFFFF00);
 //    }
 
+    triangle_t triangle;
+    triangle.points[0].x = 300;
+    triangle.points[0].y = 100;
+    triangle.points[1].x = 50;
+    triangle.points[1].y = 400;
+    triangle.points[2].x = 500;
+    triangle.points[2].y = 700;
+
+    draw_filled_triangle(&triangle, 0xFF00FFFF);
+
     array_free(triangles_to_render);
 
     render_color_buffer();
