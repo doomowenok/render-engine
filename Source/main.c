@@ -27,7 +27,7 @@ void setup(void)
         window_width,
         window_height);
 
-    load_obj_file_data("../Assets/Plane.obj");
+    load_obj_file_data("../Assets/Cube.obj");
 }
 
 void process_input(void)
@@ -72,8 +72,8 @@ void update(void)
 
     triangles_to_render = NULL;
 
-    mesh.rotation.x += 0.02f;
-    mesh.rotation.y += 0.00f;
+    mesh.rotation.x += 0.00f;
+    mesh.rotation.y += 0.02f;
     mesh.rotation.z += 0.00f;
 
     for(int i = 0; i < array_length(mesh.faces); i++)
@@ -138,27 +138,28 @@ void render(void)
 {
     draw_dots();
 
-//    for (int i = 0; i < array_length(triangles_to_render); i++)
-//    {
-//        const triangle_t triangle = triangles_to_render[i];
-//
+    for (int i = 0; i < array_length(triangles_to_render); i++)
+    {
+        triangle_t triangle = triangles_to_render[i];
+
 //        for(int j = 0; j < 3; j++)
 //        {
 //            draw_rect(triangle.points[j].x, triangle.points[j].y, 3, 3, 0xFFFFFF00);
 //        }
+
+        draw_filled_triangle(&triangle, 0xFFFFFF00);
+        draw_triangle(&triangle, 0xFFFFFFFF);
+    }
+
+//    triangle_t triangle;
+//    triangle.points[0].x = 300;
+//    triangle.points[0].y = 100;
+//    triangle.points[1].x = 50;
+//    triangle.points[1].y = 400;
+//    triangle.points[2].x = 500;
+//    triangle.points[2].y = 700;
 //
-//        draw_triangle(&triangle, 0xFFFFFF00);
-//    }
-
-    triangle_t triangle;
-    triangle.points[0].x = 300;
-    triangle.points[0].y = 100;
-    triangle.points[1].x = 50;
-    triangle.points[1].y = 400;
-    triangle.points[2].x = 500;
-    triangle.points[2].y = 700;
-
-    draw_filled_triangle(&triangle, 0xFF00FFFF);
+//    draw_filled_triangle(&triangle, 0xFF00FFFF);
 
     array_free(triangles_to_render);
 

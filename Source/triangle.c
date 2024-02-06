@@ -9,17 +9,28 @@ void fill_flat_bottom_triangle(const triangle_t* triangle, uint32_t color)
     float x_start = triangle->points[0].x;
     float x_end = triangle->points[0].x;
 
-    for(int i = triangle->points[0].y; i <= triangle->points[1].y; i++)
+    for(int i = (int)triangle->points[0].y; i <= (int)triangle->points[1].y; i++)
     {
-        draw_line(x_start, i, x_end, i, color);
+        draw_line((int)x_start, i, (int)x_end, i, color);
         x_start += inverse_slope1;
         x_end += inverse_slope2;
     }
 }
 
-void fill_flat_top_triangle(const triangle_t* triangle)
+void fill_flat_top_triangle(const triangle_t* triangle, uint32_t color)
 {
+    float inverse_slope1 = (triangle->points[2].x - triangle->points[0].x) / (triangle->points[2].y - triangle->points[0].y);
+    float inverse_slope2 = (triangle->points[2].x - triangle->points[1].x) / (triangle->points[2].y - triangle->points[1].y);
 
+    float x_start = triangle->points[2].x;
+    float x_end = triangle->points[2].x;
+
+    for(int i = (int)triangle->points[2].y; i >= (int)triangle->points[1].y; i--)
+    {
+        draw_line((int)x_start, i, (int)x_end, i, color);
+        x_start -= inverse_slope1;
+        x_end -= inverse_slope2;
+    }
 }
 
 void sort_by_increase_y(triangle_t* triangle)
@@ -110,5 +121,5 @@ void draw_filled_triangle(triangle_t* triangle, uint32_t color)
     bottom_triangle.points[2].y = sort_triangle.points[2].y;
 
     fill_flat_bottom_triangle(&top_triangle, color);
-    fill_flat_top_triangle(&bottom_triangle);
+    fill_flat_top_triangle(&bottom_triangle, color);
 }
