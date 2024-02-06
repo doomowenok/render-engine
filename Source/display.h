@@ -1,29 +1,36 @@
-#pragma once
+#ifndef DISPLAY_H
+#define DISPLAY_H
 
-#include <SDL.h>
+#include <stdint.h>
 #include <stdbool.h>
-
-#include "triangle.h"
+#include <SDL.h>
 
 #define FPS 60
 #define FRAME_TARGET_TIME (1000 / FPS)
 
 extern SDL_Window* window;
 extern SDL_Renderer* renderer;
-
 extern uint32_t* color_buffer;
 extern SDL_Texture* color_buffer_texture;
-
 extern int window_width;
 extern int window_height;
 
 bool initialize_window(void);
-void render_color_buffer(void);
-void draw_pixel(const int x, const int y, const uint32_t color);
+
 void draw_grid(void);
-void draw_dots(void);
-void draw_line(const int x0, const int y0, const int x1, const int y1, const uint32_t color);
-void draw_triangle(const triangle_t* triangle, const uint32_t color);
-void draw_rect(const int x, const int y, const int width, const int height, const uint32_t color);
-void clear_color_buffer(const uint32_t color);
+
+void draw_pixel(int x, int y, uint32_t color);
+
+void draw_line(int x0, int y0, int x1, int y1, uint32_t color);
+
+void draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
+
+void draw_rect(int x, int y, int width, int height, uint32_t color);
+
+void render_color_buffer(void);
+
+void clear_color_buffer(uint32_t color);
+
 void destroy_window(void);
+
+#endif

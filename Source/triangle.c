@@ -1,125 +1,137 @@
-#include "triangle.h"
 #include "display.h"
+#include "triangle.h"
 
-void fill_flat_bottom_triangle(const triangle_t* triangle, uint32_t color)
+void int_swap(int* a, int* b)
 {
-    float inverse_slope1 = (triangle->points[1].x - triangle->points[0].x) / (triangle->points[1].y - triangle->points[0].y);
-    float inverse_slope2 = (triangle->points[2].x - triangle->points[0].x) / (triangle->points[2].y - triangle->points[0].y);
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
 
-    float x_start = triangle->points[0].x;
-    float x_end = triangle->points[0].x;
+///////////////////////////////////////////////////////////////////////////////
+// Draw a filled a triangle with a flat bottom
+///////////////////////////////////////////////////////////////////////////////
+//
+//        (x0,y0)
+//          / \
+//         /   \
+//        /     \
+//       /       \
+//      /         \
+//  (x1,y1)------(x2,y2)
+//
+///////////////////////////////////////////////////////////////////////////////
+void fill_flat_bottom_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
+{
+    // Find the two slopes (two triangle legs)
+    float inv_slope_1 = (float) (x1 - x0) / (y1 - y0);
+    float inv_slope_2 = (float) (x2 - x0) / (y2 - y0);
 
-    for(int i = (int)triangle->points[0].y; i <= (int)triangle->points[1].y; i++)
+    // Start x_start and x_end from the top vertex (x0,y0)
+    float x_start = x0;
+    float x_end = x0;
+
+    // Loop all the scanlines from top to bottom
+    for (int y = y0; y <= y2; y++)
     {
-        draw_line((int)x_start, i, (int)x_end, i, color);
-        x_start += inverse_slope1;
-        x_end += inverse_slope2;
+        draw_line(x_start, y, x_end, y, color);
+        x_start += inv_slope_1;
+        x_end += inv_slope_2;
     }
 }
 
-void fill_flat_top_triangle(const triangle_t* triangle, uint32_t color)
+///////////////////////////////////////////////////////////////////////////////
+// Draw a filled a triangle with a flat top
+///////////////////////////////////////////////////////////////////////////////
+//
+//  (x0,y0)------(x1,y1)
+//      \         /
+//       \       /
+//        \     /
+//         \   /
+//          \ /
+//        (x2,y2)
+//
+///////////////////////////////////////////////////////////////////////////////
+void fill_flat_top_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
 {
-    float inverse_slope1 = (triangle->points[2].x - triangle->points[0].x) / (triangle->points[2].y - triangle->points[0].y);
-    float inverse_slope2 = (triangle->points[2].x - triangle->points[1].x) / (triangle->points[2].y - triangle->points[1].y);
+    // Find the two slopes (two triangle legs)
+    float inv_slope_1 = (float) (x2 - x0) / (y2 - y0);
+    float inv_slope_2 = (float) (x2 - x1) / (y2 - y1);
 
-    float x_start = triangle->points[2].x;
-    float x_end = triangle->points[2].x;
+    // Start x_start and x_end from the bottom vertex (x2,y2)
+    float x_start = x2;
+    float x_end = x2;
 
-    for(int i = (int)triangle->points[2].y; i >= (int)triangle->points[1].y; i--)
+    // Loop all the scanlines from bottom to top
+    for (int y = y2; y >= y0; y--)
     {
-        draw_line((int)x_start, i, (int)x_end, i, color);
-        x_start -= inverse_slope1;
-        x_end -= inverse_slope2;
+        draw_line(x_start, y, x_end, y, color);
+        x_start -= inv_slope_1;
+        x_end -= inv_slope_2;
     }
 }
 
-void sort_by_increase_y(triangle_t* triangle)
+///////////////////////////////////////////////////////////////////////////////
+// Draw a filled triangle with the flat-top/flat-bottom method
+// We split the original triangle in two, half flat-bottom and half flat-top
+///////////////////////////////////////////////////////////////////////////////
+//
+//          (x0,y0)
+//            / \
+//           /   \
+//          /     \
+//         /       \
+//        /         \
+//   (x1,y1)------(Mx,My)
+//       \_           \
+//          \_         \
+//             \_       \
+//                \_     \
+//                   \    \
+//                     \_  \
+//                        \_\
+//                           \
+//                         (x2,y2)
+//
+///////////////////////////////////////////////////////////////////////////////
+void draw_filled_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
 {
-    if(triangle->points[0].y > triangle->points[1].y)
+    // We need to sort the vertices by y-coordinate ascending (y0 < y1 < y2)
+    if (y0 > y1)
     {
-        float local_y0 = triangle->points[0].y;
-        float local_y1 = triangle->points[1].y;
-
-        float local_x0 = triangle->points[0].x;
-        float local_x1 = triangle->points[1].x;
-
-        triangle->points[0].y = local_y1;
-        triangle->points[0].x = local_x1;
-
-        triangle->points[1].y = local_y0;
-        triangle->points[1].x = local_x0;
+        int_swap(&y0, &y1);
+        int_swap(&x0, &x1);
+    }
+    if (y1 > y2)
+    {
+        int_swap(&y1, &y2);
+        int_swap(&x1, &x2);
+    }
+    if (y0 > y1)
+    {
+        int_swap(&y0, &y1);
+        int_swap(&x0, &x1);
     }
 
-    if(triangle->points[1].y > triangle->points[2].y)
+    if (y1 == y2)
     {
-        float local_y0 = triangle->points[1].y;
-        float local_y1 = triangle->points[2].y;
-
-        float local_x0 = triangle->points[1].x;
-        float local_x1 = triangle->points[2].x;
-
-        triangle->points[1].y = local_y1;
-        triangle->points[1].x = local_x1;
-
-        triangle->points[2].y = local_y0;
-        triangle->points[2].x = local_x0;
-    }
-
-    if(triangle->points[0].y > triangle->points[1].y)
+        // Draw flat-bottom triangle
+        fill_flat_bottom_triangle(x0, y0, x1, y1, x2, y2, color);
+    } else if (y0 == y1)
     {
-        float local_y0 = triangle->points[0].y;
-        float local_y1 = triangle->points[1].y;
-
-        float local_x0 = triangle->points[0].x;
-        float local_x1 = triangle->points[1].x;
-
-        triangle->points[0].y = local_y1;
-        triangle->points[0].x = local_x1;
-
-        triangle->points[1].y = local_y0;
-        triangle->points[1].x = local_x0;
-    }
-}
-
-void draw_filled_triangle(triangle_t* triangle, uint32_t color)
-{
-    triangle_t sort_triangle;
-
-    for(int i = 0; i < 3; i++)
+        // Draw flat-top triangle
+        fill_flat_top_triangle(x0, y0, x1, y1, x2, y2, color);
+    } else
     {
-        sort_triangle.points[i] = triangle->points[i];
+        // Calculate the new vertex (Mx,My) using triangle similarity
+        int My = y1;
+        int Mx = (((x2 - x0) * (y1 - y0)) / (y2 - y0)) + x0;
+
+        // Draw flat-bottom triangle
+        fill_flat_bottom_triangle(x0, y0, x1, y1, Mx, My, color);
+
+        // Draw flat-top triangle
+        fill_flat_top_triangle(x1, y1, Mx, My, x2, y2, color);
     }
-
-    sort_by_increase_y(&sort_triangle);
-
-    float division_y = sort_triangle.points[1].y;
-    float division_x =
-            (((sort_triangle.points[2].x - sort_triangle.points[0].x) *
-            (sort_triangle.points[1].y - sort_triangle.points[0].y)) /
-            (sort_triangle.points[2].y - sort_triangle.points[0].y)) + triangle->points[0].x;
-
-    triangle_t top_triangle;
-
-    top_triangle.points[0].x = sort_triangle.points[0].x;
-    top_triangle.points[0].y = sort_triangle.points[0].y;
-
-    top_triangle.points[1].x = sort_triangle.points[1].x;
-    top_triangle.points[1].y = sort_triangle.points[1].y;
-
-    top_triangle.points[2].x = division_x;
-    top_triangle.points[2].y = division_y;
-
-    triangle_t bottom_triangle;
-
-    bottom_triangle.points[0].x = sort_triangle.points[1].x;
-    bottom_triangle.points[0].y = sort_triangle.points[1].y;
-
-    bottom_triangle.points[1].x = division_x;
-    bottom_triangle.points[1].y = division_y;
-
-    bottom_triangle.points[2].x = sort_triangle.points[2].x;
-    bottom_triangle.points[2].y = sort_triangle.points[2].y;
-
-    fill_flat_bottom_triangle(&top_triangle, color);
-    fill_flat_top_triangle(&bottom_triangle, color);
 }
