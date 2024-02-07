@@ -7,6 +7,7 @@
 #include "mesh.h"
 #include "triangle.h"
 #include "array.h"
+#include "matrix.h"
 
 enum cull_method
 {
@@ -114,9 +115,23 @@ void update(void)
     // Initialize the array of triangles to render
     triangles_to_render = NULL;
 
-    mesh.rotation.x += 0.01;
-    mesh.rotation.y += 0.01;
-    mesh.rotation.z += 0.01;
+    // Change the mesh scale/rotation values per animation frame
+    mesh.rotation.x += 0.01f;
+    mesh.rotation.y += 0.01f;
+    mesh.rotation.z += 0.01f;
+
+    // mesh.scale.x += 0.002f;
+    // mesh.scale.y += 0.001f;
+
+    mesh.translation.x += 0.01f;
+    mesh.translation.z = 5.0f;
+
+    // Create a scale, translation and rotation matrices that will be used to multiply the mesh vertices
+    mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+    mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
+    mat4_t rotation_x_matrix = mat4_make_rotation_x(mesh.rotation.x);
+    mat4_t rotation_y_matrix = mat4_make_rotation_y(mesh.rotation.y);
+    mat4_t rotation_z_matrix = mat4_make_rotation_z(mesh.rotation.z);
 
     // Loop all triangle faces of our mesh
     int num_faces = array_length(mesh.faces);
@@ -129,19 +144,25 @@ void update(void)
         face_vertices[1] = mesh.vertices[mesh_face.b - 1];
         face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
-        vec3_t transformed_vertices[3];
+        vec4_t transformed_vertices[3];
 
         // Loop all three vertices of this current face and apply transformations
         for (int j = 0; j < 3; j++)
         {
-            vec3_t transformed_vertex = face_vertices[j];
+            vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
-            transformed_vertex = vec3_rotate_x(transformed_vertex, mesh.rotation.x);
-            transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
-            transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
+            // Create a World Matrix combining scale, rotation, and translation matrices
+            mat4_t world_matrix = mat4_identity();
 
-            // Translate the vertex away from the camera
-            transformed_vertex.z += 5;
+            // Order matters: First scale, then rotate, then translate. [T] * [R] * [S] * v - read inverse!
+            world_matrix = mat4_mul_mat4(scale_matrix, world_matrix);
+            world_matrix = mat4_mul_mat4(rotation_z_matrix, world_matrix);
+            world_matrix = mat4_mul_mat4(rotation_y_matrix, world_matrix);
+            world_matrix = mat4_mul_mat4(rotation_x_matrix, world_matrix);
+            world_matrix = mat4_mul_mat4(translation_matrix, world_matrix);
+.
+            // Multiply the world matrix by the original vector
+            transformed_vertex = mat4_mul_vec4(world_matrix, transformed_vertex);
 
             // Save transformed vertex in the array of transformed vertices
             transformed_vertices[j] = transformed_vertex;
@@ -150,9 +171,9 @@ void update(void)
         // Backface culling test to see if the current face should be projected
         if (cull_method == CULL_BACKFACE)
         {
-            vec3_t vector_a = transformed_vertices[0]; /*   A   */
-            vec3_t vector_b = transformed_vertices[1]; /*  / \  */
-            vec3_t vector_c = transformed_vertices[2]; /* C---B */
+            vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]); /*   A   */
+            vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]); /*  / \  */
+            vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]); /* C---B */
 
             // Get the vector subtraction of B-A and C-A
             vec3_t vector_ab = vec3_sub(vector_b, vector_a);
@@ -183,7 +204,7 @@ void update(void)
         for (int j = 0; j < 3; j++)
         {
             // Project the current vertex
-            projected_points[j] = project(transformed_vertices[j]);
+            projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
 
             // Scale and translate the projected points to the middle of the screen
             projected_points[j].x += (window_width / 2);
@@ -295,6 +316,7 @@ void free_resources(void)
 // Main function
 ///////////////////////////////////////////////////////////////////////////////
 #if WIN32
+
 int SDL_main(int argc, char* argv[])
 #else
 
