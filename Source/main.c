@@ -8,6 +8,20 @@
 #include "triangle.h"
 #include "array.h"
 
+enum cull_method
+{
+    CULL_NONE,
+    CULL_BACKFACE
+} cull_method;
+
+enum render_method
+{
+    RENDER_WIRE,
+    RENDER_WIRE_VERTEX,
+    RENDER_FILL_TRIANGLE,
+    RENDER_FILL_TRIANGLE_WIRE
+} render_method;
+
 triangle_t* triangles_to_render = NULL;;
 
 vec3_t camera_position = {0.0f, 0.0f, 0.0f};
