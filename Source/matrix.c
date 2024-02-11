@@ -126,3 +126,37 @@ mat4_t mat4_mul_mat4(mat4_t a, mat4_t b)
 
     return m;
 }
+
+mat4_t mat4_make_perspective(float field_of_view, float aspect_ratio, float z_near, float z_far)
+{
+    // | (aspect_ration) * (1 / tan(field_of_view / 2))                           0                         0                                     0 |
+    // |                                              0  1 / tan(field_of_view / 2)                         0                                     0 |
+    // |                                              0                           0  z_far / (z_far - z_near)  (-z_far * z_near) / (z_far - z_near) |
+    // |                                              0                           0                         1                                     0 |
+    mat4_t m = mat4_identity();
+
+    m.m[0][0] = aspect_ratio * (1 / tan(field_of_view / 2));
+    m.m[1][1] = 1 / tan(field_of_view / 2);
+    m.m[2][2] = z_far / (z_far - z_near);
+    m.m[2][3] = (-z_far * z_near) / (z_far - z_near);
+    m.m[3][2] = 1;
+    m.m[3][3] = 0;
+
+    return m;
+}
+
+vec4_t mat4_mul_vec4_project(mat4_t projection_matrix, vec4_t v)
+{
+    // multiply the projection matrix by our original vector
+    vec4_t result = mat4_mul_vec4(projection_matrix, v);
+
+    // perform perspective divide with original z-value that is now stored in w
+    if(result.w != 0.0f)
+    {
+        result.x /= result.w;
+        result.y /= result.w;
+        result.z /= result.w;
+    }
+
+    return result;
+}

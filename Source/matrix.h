@@ -16,5 +16,7 @@ mat4_t mat4_make_rotation_z(float angle);
 mat4_t mat4_make_rotation_x(float angle);
 mat4_t mat4_make_rotation_y(float angle);
 mat4_t mat4_mul_mat4(mat4_t a, mat4_t b);
+mat4_t mat4_make_perspective(float field_of_view, float aspect_ratio, float z_near, float z_far);
+vec4_t mat4_mul_vec4_project(mat4_t projection_matrix, vec4_t v);
 
 #endif

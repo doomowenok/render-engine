@@ -23,13 +23,13 @@ enum render_method
     RENDER_FILL_TRIANGLE_WIRE
 } render_method;
 
-triangle_t* triangles_to_render = NULL;;
-
-vec3_t camera_position = {0.0f, 0.0f, 0.0f};
-float fov_factor = 640.0f;
+triangle_t* triangles_to_render = NULL;
 
 bool is_running = false;
 int previous_frame_time = 0;
+
+vec3_t camera_position = {0.0f, 0.0f, 0.0f};
+mat4_t projection_matrix;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Setup function to initialize variables and game objects
@@ -51,6 +51,13 @@ void setup(void)
             window_width,
             window_height
     );
+
+    // Initialize perspective projection matrix
+    float fov = M_PI / 3.0f;   // 60.0 degrees in radians
+    float aspect_ratio = (float)window_height / (float)window_width;
+    float z_near = 0.1f;
+    float z_far = 100.0f;
+    projection_matrix = mat4_make_perspective(fov, aspect_ratio, z_near, z_far);
 
     // Loads the vertex and face values for the mesh data structure
     load_cube_mesh_data();
@@ -84,18 +91,6 @@ void process_input(void)
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Function that receives a 3D vector and returns a projected 2D point
-////////////////////////////////////////////////////////////////////////////////
-vec2_t project(vec3_t point)
-{
-    vec2_t projected_point = {
-            .x = (fov_factor * point.x) / point.z,
-            .y = (fov_factor * point.y) / point.z
-    };
-    return projected_point;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Update function frame by frame with a fixed time step
 ///////////////////////////////////////////////////////////////////////////////
@@ -117,13 +112,13 @@ void update(void)
 
     // Change the mesh scale/rotation values per animation frame
     mesh.rotation.x += 0.01f;
-    mesh.rotation.y += 0.01f;
-    mesh.rotation.z += 0.01f;
+    // mesh.rotation.y += 0.01f;
+    // mesh.rotation.z += 0.01f;
 
     // mesh.scale.x += 0.002f;
     // mesh.scale.y += 0.001f;
 
-    mesh.translation.x += 0.01f;
+    // mesh.translation.x += 0.01f;
     mesh.translation.z = 5.0f;
 
     // Create a scale, translation and rotation matrices that will be used to multiply the mesh vertices
@@ -160,7 +155,7 @@ void update(void)
             world_matrix = mat4_mul_mat4(rotation_y_matrix, world_matrix);
             world_matrix = mat4_mul_mat4(rotation_x_matrix, world_matrix);
             world_matrix = mat4_mul_mat4(translation_matrix, world_matrix);
-.
+
             // Multiply the world matrix by the original vector
             transformed_vertex = mat4_mul_vec4(world_matrix, transformed_vertex);
 
@@ -198,17 +193,21 @@ void update(void)
             }
         }
 
-        vec2_t projected_points[3];
+        vec4_t projected_points[3];
 
         // Loop all three vertices to perform projection
         for (int j = 0; j < 3; j++)
         {
             // Project the current vertex
-            projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+            projected_points[j] = mat4_mul_vec4_project(projection_matrix, transformed_vertices[j]);
 
-            // Scale and translate the projected points to the middle of the screen
-            projected_points[j].x += (window_width / 2);
-            projected_points[j].y += (window_height / 2);
+            // Scale into the view
+            projected_points[j].x *= window_width / 2.0f;
+            projected_points[j].y *= window_height / 2.0f;
+
+            // Translate the projected points to the middle of the screen
+            projected_points[j].x += (window_width / 2.0f);
+            projected_points[j].y += (window_height / 2.0f);
         }
 
         // Calculate the average depth for each face based on the vertices after transformation
