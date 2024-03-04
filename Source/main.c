@@ -122,8 +122,8 @@ void update(void)
     triangles_to_render = NULL;
 
     // Change the mesh scale/rotation values per animation frame
-    mesh.rotation.x += 0.05f;
-    // mesh.rotation.y += 0.05f;
+    // mesh.rotation.x += 0.05f;
+    mesh.rotation.y += 0.01f;
     // mesh.rotation.z += 0.05f;
 
     // mesh.scale.x += 0.002f;
