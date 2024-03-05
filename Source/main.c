@@ -49,22 +49,22 @@ void setup(void)
 
     // Creating a SDL texture that is used to display the color buffer
     color_buffer_texture = SDL_CreateTexture(
-            renderer,
-            SDL_PIXELFORMAT_ARGB8888,
-            SDL_TEXTUREACCESS_STREAMING,
-            window_width,
-            window_height
+        renderer,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        window_width,
+        window_height
     );
 
     // Initialize perspective projection matrix
-    float fov = M_PI / 3.0f;   // 60.0 degrees in radians
+    float fov = M_PI / 3.0f; // 60.0 degrees in radians
     float aspect_ratio = (float) window_height / (float) window_width;
     float z_near = 0.1f;
     float z_far = 100.0f;
     projection_matrix = mat4_make_perspective(fov, aspect_ratio, z_near, z_far);
 
     // Manually load the hardcoded texture data from the static array
-    mesh_texture = (uint32_t*)REDBRICK_TEXTURE;
+    mesh_texture = (uint32_t*) REDBRICK_TEXTURE;
     texture_width = 64;
     texture_height = 64;
 
@@ -123,14 +123,14 @@ void update(void)
 
     // Change the mesh scale/rotation values per animation frame
     // mesh.rotation.x += 0.05f;
-    mesh.rotation.y += 0.01f;
+    mesh.rotation.y += 0.05f;
     // mesh.rotation.z += 0.05f;
 
     // mesh.scale.x += 0.002f;
     // mesh.scale.y += 0.001f;
 
     // mesh.translation.x += 0.01f;
-    mesh.translation.z = 20.0f;
+    mesh.translation.z = 10.0f;
 
     // Create a scale, translation and rotation matrices that will be used to multiply the mesh vertices
     mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
@@ -234,22 +234,22 @@ void update(void)
         uint32_t triangle_color = light_apply_intensity(mesh_face.color, light_intensity_factor);
 
         triangle_t projected_triangle =
-                {
-                        .points =
-                                {
-                                        {projected_points[0].x, projected_points[0].y},
-                                        {projected_points[1].x, projected_points[1].y},
-                                        {projected_points[2].x, projected_points[2].y},
-                                },
-                        .color = triangle_color,
-                        .avg_depth = avg_depth,
-                        .tex_coords =
-                                {
-                                        {mesh_face.a_uv.u, mesh_face.a_uv.v},
-                                        {mesh_face.b_uv.u, mesh_face.b_uv.v},
-                                        {mesh_face.c_uv.u, mesh_face.c_uv.v},
-                                }
-                };
+        {
+            .points =
+            {
+                {projected_points[0].x, projected_points[0].y, projected_points[0].z, projected_points[0].w },
+                {projected_points[1].x, projected_points[1].y, projected_points[1].z, projected_points[1].w },
+                {projected_points[2].x, projected_points[2].y, projected_points[2].z, projected_points[2].w },
+            },
+            .color = triangle_color,
+            .avg_depth = avg_depth,
+            .tex_coords =
+            {
+                {mesh_face.a_uv.u, mesh_face.a_uv.v},
+                {mesh_face.b_uv.u, mesh_face.b_uv.v},
+                {mesh_face.c_uv.u, mesh_face.c_uv.v},
+            }
+        };
 
         // Save the projected triangle in the array of triangles to render
         array_push(triangles_to_render, projected_triangle);
@@ -291,10 +291,10 @@ void render(void)
         if (render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE)
         {
             draw_filled_triangle(
-                    triangle.points[0].x, triangle.points[0].y, // vertex A
-                    triangle.points[1].x, triangle.points[1].y, // vertex B
-                    triangle.points[2].x, triangle.points[2].y, // vertex C
-                    triangle.color
+                triangle.points[0].x, triangle.points[0].y, // vertex A
+                triangle.points[1].x, triangle.points[1].y, // vertex B
+                triangle.points[2].x, triangle.points[2].y, // vertex C
+                triangle.color
             );
         }
 
@@ -302,10 +302,10 @@ void render(void)
         if (render_method == RENDER_TEXTURED || render_method == RENDER_TEXTURED_WIRE)
         {
             draw_textured_triangle(
-                    triangle.points[0].x, triangle.points[0].y, triangle.tex_coords[0].u, triangle.tex_coords[0].v,  // vertex A
-                    triangle.points[1].x, triangle.points[1].y, triangle.tex_coords[1].u, triangle.tex_coords[1].v,  // vertex B
-                    triangle.points[2].x, triangle.points[2].y, triangle.tex_coords[2].u, triangle.tex_coords[2].v,  // vertex C
-                    mesh_texture
+                triangle.points[0].x, triangle.points[0].y, triangle.points[0].z, triangle.points[0].w, triangle.tex_coords[0].u, triangle.tex_coords[0].v,  // vertex A
+                triangle.points[1].x, triangle.points[1].y, triangle.points[1].z, triangle.points[1].w, triangle.tex_coords[1].u, triangle.tex_coords[1].v,  // vertex B
+                triangle.points[2].x, triangle.points[2].y, triangle.points[2].z, triangle.points[2].w, triangle.tex_coords[2].u, triangle.tex_coords[2].v, // vertex C
+                mesh_texture
             );
         }
 
@@ -314,10 +314,10 @@ void render(void)
             render_method == RENDER_FILL_TRIANGLE_WIRE || render_method == RENDER_TEXTURED_WIRE)
         {
             draw_triangle(
-                    triangle.points[0].x, triangle.points[0].y, // vertex A
-                    triangle.points[1].x, triangle.points[1].y, // vertex B
-                    triangle.points[2].x, triangle.points[2].y, // vertex C
-                    0xFFFFFFFF
+                triangle.points[0].x, triangle.points[0].y, // vertex A
+                triangle.points[1].x, triangle.points[1].y, // vertex B
+                triangle.points[2].x, triangle.points[2].y, // vertex C
+                0xFFFFFFFF
             );
         }
 
