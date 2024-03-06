@@ -71,10 +71,10 @@ void setup(void)
 
     // Loads the vertex and face values for the mesh data structure
     // load_cube_mesh_data();
-    load_obj_file_data("../Assets/Cube.obj");
+    load_obj_file_data("../Assets/sphere.obj");
 
     // Load texture information from an external PNG file
-    load_png_texture_data("../Assets/Cube.png");
+    load_png_texture_data("../Assets/pikuma.png");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@ void update(void)
     // mesh.scale.y += 0.001f;
 
     // mesh.translation.x += 0.01f;
-    mesh.translation.z = 10.0f;
+    mesh.translation.z = 5.0f;
 
     // Create a scale, translation and rotation matrices that will be used to multiply the mesh vertices
     mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
@@ -150,9 +150,9 @@ void update(void)
         face_t mesh_face = mesh.faces[i];
 
         vec3_t face_vertices[3];
-        face_vertices[0] = mesh.vertices[mesh_face.a - 1];
-        face_vertices[1] = mesh.vertices[mesh_face.b - 1];
-        face_vertices[2] = mesh.vertices[mesh_face.c - 1];
+        face_vertices[0] = mesh.vertices[mesh_face.a];
+        face_vertices[1] = mesh.vertices[mesh_face.b];
+        face_vertices[2] = mesh.vertices[mesh_face.c];
 
         vec4_t transformed_vertices[3];
 
