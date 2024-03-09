@@ -12,6 +12,8 @@
 #include "light.h"
 #include "texture.h"
 
+#define MAX_TRIANGLES_PER_MESH 10000
+
 enum cull_method
 {
     CULL_NONE,
@@ -28,7 +30,8 @@ enum render_method
     RENDER_TEXTURED_WIRE
 } render_method;
 
-triangle_t* triangles_to_render = NULL;
+triangle_t triangles_to_render[MAX_TRIANGLES_PER_MESH];
+uint num_triangles_to_render = 0;
 
 bool is_running = false;
 int previous_frame_time = 0;
@@ -45,8 +48,9 @@ void setup(void)
     render_method = RENDER_WIRE;
     cull_method = CULL_BACKFACE;
 
-    // Allocate the required memory in bytes to hold the color buffer
+    // Allocate the required memory in bytes to hold the color buffer and the z_buffer
     color_buffer = (uint32_t*) malloc(sizeof(uint32_t) * window_width * window_height);
+    z_buffer = (float*) malloc(sizeof(float) * window_width * window_height);
 
     // Creating a SDL texture that is used to display the color buffer
     color_buffer_texture = SDL_CreateTexture(
@@ -71,10 +75,10 @@ void setup(void)
 
     // Loads the vertex and face values for the mesh data structure
     // load_cube_mesh_data();
-    load_obj_file_data("../Assets/sphere.obj");
+    load_obj_file_data("../Assets/drone.obj");
 
     // Load texture information from an external PNG file
-    load_png_texture_data("../Assets/pikuma.png");
+    load_png_texture_data("../Assets/drone.png");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,11 +126,11 @@ void update(void)
 
     previous_frame_time = SDL_GetTicks();
 
-    // Initialize the array of triangles to render
-    triangles_to_render = NULL;
+    // Initialize the counter of triangles to render for the current frame
+    num_triangles_to_render = 0;
 
     // Change the mesh scale/rotation values per animation frame
-    // mesh.rotation.x += 0.05f;
+    // mesh.rotation.x += 0.025f;
     mesh.rotation.y += 0.05f;
     // mesh.rotation.z += 0.05f;
 
@@ -228,9 +232,6 @@ void update(void)
             projected_points[j].y += (window_height / 2.0f);
         }
 
-        // Calculate the average depth for each face based on the vertices after transformation
-        float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3.0f;
-
         // Calculate the shade intensity based on how aligned the face normal and light direction
         float light_intensity_factor = -vec3_dot(normal, light.direction);
 
@@ -245,33 +246,20 @@ void update(void)
                 {projected_points[1].x, projected_points[1].y, projected_points[1].z, projected_points[1].w },
                 {projected_points[2].x, projected_points[2].y, projected_points[2].z, projected_points[2].w },
             },
-            .color = triangle_color,
-            .avg_depth = avg_depth,
             .tex_coords =
             {
                 {mesh_face.a_uv.u, mesh_face.a_uv.v},
                 {mesh_face.b_uv.u, mesh_face.b_uv.v},
                 {mesh_face.c_uv.u, mesh_face.c_uv.v},
-            }
+            },
+            .color = triangle_color,
         };
 
         // Save the projected triangle in the array of triangles to render
-        array_push(triangles_to_render, projected_triangle);
-    }
-
-    // Sort the triangles to render by their avg_depth
-    int num_triangles = array_length(triangles_to_render);
-    for (int i = 0; i < num_triangles; i++)
-    {
-        for (int j = i; j < num_triangles; j++)
+        if(num_triangles_to_render < MAX_TRIANGLES_PER_MESH)
         {
-            if (triangles_to_render[i].avg_depth < triangles_to_render[j].avg_depth)
-            {
-                // Swap the triangles positions in the array
-                triangle_t temp = triangles_to_render[i];
-                triangles_to_render[i] = triangles_to_render[j];
-                triangles_to_render[j] = temp;
-            }
+            triangles_to_render[num_triangles_to_render] = projected_triangle;
+            num_triangles_to_render++;
         }
     }
 }
@@ -286,8 +274,7 @@ void render(void)
     draw_grid();
 
     // Loop all projected triangles and render them
-    int num_triangles = array_length(triangles_to_render);
-    for (int i = 0; i < num_triangles; i++)
+    for (int i = 0; i < num_triangles_to_render; i++)
     {
         triangle_t triangle = triangles_to_render[i];
 
@@ -295,9 +282,9 @@ void render(void)
         if (render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE)
         {
             draw_filled_triangle(
-                triangle.points[0].x, triangle.points[0].y, // vertex A
-                triangle.points[1].x, triangle.points[1].y, // vertex B
-                triangle.points[2].x, triangle.points[2].y, // vertex C
+                triangle.points[0].x, triangle.points[0].y, triangle.points[0].z, triangle.points[0].w, // vertex A
+                triangle.points[1].x, triangle.points[1].y, triangle.points[1].z, triangle.points[1].w, // vertex B
+                triangle.points[2].x, triangle.points[2].y, triangle.points[2].z, triangle.points[2].w,  // vertex C
                 triangle.color
             );
         }
@@ -334,12 +321,10 @@ void render(void)
         }
     }
 
-    // Clear the array of triangles to render every frame loop
-    array_free(triangles_to_render);
-
     render_color_buffer();
 
     clear_color_buffer(0xFF000000);
+    clear_z_buffer();
 
     SDL_RenderPresent(renderer);
 }
@@ -351,6 +336,7 @@ void free_resources(void)
 {
     upng_free(png_texture);
     free(color_buffer);
+    free(z_buffer);
     array_free(mesh.faces);
     array_free(mesh.vertices);
 }

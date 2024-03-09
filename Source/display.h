@@ -5,12 +5,13 @@
 #include <stdbool.h>
 #include <SDL.h>
 
-#define FPS 60
+#define FPS 30
 #define FRAME_TARGET_TIME (1000 / FPS)
 
 extern SDL_Window* window;
 extern SDL_Renderer* renderer;
 extern uint32_t* color_buffer;
+extern float* z_buffer;
 extern SDL_Texture* color_buffer_texture;
 extern int window_width;
 extern int window_height;
@@ -30,6 +31,8 @@ void draw_rect(int x, int y, int width, int height, uint32_t color);
 void render_color_buffer(void);
 
 void clear_color_buffer(uint32_t color);
+
+void clear_z_buffer();
 
 void destroy_window(void);
 
