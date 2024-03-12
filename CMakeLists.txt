@@ -9,7 +9,7 @@ file(GLOB SOURCE_FILES
         ${SOURCE_DIR}/*.h)
 
 if (WIN32)
-    set(CMAKE_PREFIX_PATH "C:/Library/SDL2-2.30.0/x86_64-w64-mingw32")
+    set(CMAKE_PREFIX_PATH "C:/Library/SDL2-2.30.1/x86_64-w64-mingw32")
 endif (WIN32)
 
 find_package(SDL2 REQUIRED)
