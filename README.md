@@ -1,5 +1,6 @@
-# RenderEngine
-Implementation of render engine using only CPU power.
+# Render Engine on CPU.
+
+Render engine using only CPU written on pure C language.
 
 # Notes for Windows
     1. Using MinGW.
