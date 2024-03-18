@@ -63,3 +63,28 @@ void init_frustum_planes(float fov, float z_near, float z_far)
 	frustum_planes[FAR_FRUSTUM_PLANE].normal.y = 0;
 	frustum_planes[FAR_FRUSTUM_PLANE].normal.z = -1;
 }
+
+polygon_t create_polygon_from_triangle(vec3_t v0, vec3_t v1, vec3_t v2)
+{
+	polygon_t polygon = 
+	{
+		.vertices = {v0, v1, v2},
+		.num_vertices = 3
+	};
+    return polygon;
+}
+
+void clip_polygon_against_plane(polygon_t* polygon, int plane)
+{
+
+}
+
+void clip_polygon(polygon_t* polygon)
+{
+	clip_polygon_against_plane(polygon, LEFT_FRUSTUM_PLANE);
+	clip_polygon_against_plane(polygon, RIGHT_FRUSTUM_PLANE);
+	clip_polygon_against_plane(polygon, TOP_FRUSTUM_PLANE);
+	clip_polygon_against_plane(polygon, BOTTOM_FRUSTUM_PLANE);
+	clip_polygon_against_plane(polygon, NEAR_FRUSTUM_PLANE);
+	clip_polygon_against_plane(polygon, FAR_FRUSTUM_PLANE);
+}
