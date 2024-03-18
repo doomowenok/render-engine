@@ -5,12 +5,12 @@
 
 enum
 {
-    LEFT_FRUSTRUM_PLANE,
-    RIGHT_FRUSTRUM_PLANE,
-    TOP_FRUSTRUM_PLANE,
-    BOTTOM_FRUSTRUM_PLANE,
-    NEAR_FRUSTRUM_PLANE,
-    FAR_FRUSTRUM_PLANE
+    LEFT_FRUSTUM_PLANE,
+    RIGHT_FRUSTUM_PLANE,
+    TOP_FRUSTUM_PLANE,
+    BOTTOM_FRUSTUM_PLANE,
+    NEAR_FRUSTUM_PLANE,
+    FAR_FRUSTUM_PLANE
 };
 
 typedef struct
@@ -18,5 +18,7 @@ typedef struct
     vec3_t point;
     vec3_t normal;
 } plane_t;
+
+void init_frustum_planes(float fov, float z_near, float z_far);
 
 #endif //CLIPPING_H
