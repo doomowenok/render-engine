@@ -1,6 +1,5 @@
 #include <math.h>
 #include "vector.h"
-#include "array.h"
 #include "clipping.h"
 
 #define NUM_PLANES 6
@@ -104,9 +103,9 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane)
 			float t = previous_dot / (previous_dot - current_dot);
 
 			// Calculate the intersection point I = Q1 + t(Q2 - Q1)
-			vec3_t intersection_point = vec3_clone(current_vertex);					// I =        Qc
+			vec3_t intersection_point = vec3_clone(current_vertex);						// I =        Qc
 			intersection_point = vec3_sub(intersection_point, *previous_vertex);	// I =  	 (Qc - Qp)
-			intersection_point = vec3_mul(intersection_point, t);					// I = 		t(Qc - Qp)
+			intersection_point = vec3_mul(intersection_point, t);						// I = 		t(Qc - Qp)
 			intersection_point = vec3_add(intersection_point, *previous_vertex);	// I = Qp + t(Qc - Qp)
 
 			// Insert the intersection point to the list of "inside vertices"
@@ -149,12 +148,18 @@ void clip_polygon(polygon_t* polygon)
 
 void triangles_from_polygon(polygon_t* polygon, triangle_t* triangles_after_clipping, int* num_triangles_after_clipping)
 {
-	for(int i = 0; i < num_triangles_after_clipping - 2; i++)
+	int num_of_triangles = polygon->num_vertices - 2;
+
+	for(int i = 0; i < num_of_triangles; i++)
 	{
 		int index0 = 0;
 		int index1 = i + 1;
 		int index2 = i + 2;
 
-		
+		triangles_after_clipping[i].points[0] = vec4_from_vec3(polygon->vertices[index0]);
+		triangles_after_clipping[i].points[1] = vec4_from_vec3(polygon->vertices[index1]);
+		triangles_after_clipping[i].points[2] = vec4_from_vec3(polygon->vertices[index2]);
 	}
+
+	*num_triangles_after_clipping = num_of_triangles;
 }
