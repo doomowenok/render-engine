@@ -146,3 +146,15 @@ void clip_polygon(polygon_t* polygon)
 	clip_polygon_against_plane(polygon, NEAR_FRUSTUM_PLANE);
 	clip_polygon_against_plane(polygon, FAR_FRUSTUM_PLANE);
 }
+
+void triangles_from_polygon(polygon_t* polygon, triangle_t* triangles_after_clipping, int* num_triangles_after_clipping)
+{
+	for(int i = 0; i < num_triangles_after_clipping - 2; i++)
+	{
+		int index0 = 0;
+		int index1 = i + 1;
+		int index2 = i + 2;
+
+		
+	}
+}

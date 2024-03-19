@@ -263,6 +263,14 @@ void update(void)
         // Clip the polygon and returns a new polygon with potential new vertices
         clip_polygon(&polygon);
 
+        // Break the clippied polygon apart back into individual triangle
+        triangle_t triangles_after_clipping[MAX_NUM_POLY_TRIANGLES];
+        int num_triangles_after_clipping = 0;
+
+        triangles_from_polygon(&polygon, &triangles_after_clipping, &num_triangles_after_clipping);
+
+        // ... Here we will have the array of triangles and also the number of triangles
+
         vec4_t projected_points[3];
 
         // Loop all three vertices to perform projection
