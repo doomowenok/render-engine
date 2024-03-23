@@ -29,7 +29,7 @@ typedef struct
     int num_vertices;
 } polygon_t;
 
-void init_frustum_planes(float fov, float z_near, float z_far);
+void init_frustum_planes(float fov_x, float fov_y, float z_near, float z_far);
 polygon_t create_polygon_from_triangle(vec3_t v0, vec3_t v1, vec3_t v2);
 void clip_polygon(polygon_t* polygon);
 void triangles_from_polygon(polygon_t* polygon, triangle_t* triangles_after_clipping, int* num_triangles_after_clipping);

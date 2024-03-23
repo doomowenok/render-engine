@@ -69,14 +69,16 @@ void setup(void)
     );
 
     // Initialize perspective projection matrix
-    float fov = M_PI / 3.0f; // 60.0 degrees in radians
-    float aspect_ratio = (float) window_height / (float) window_width;
+    float aspect_ratio_x = (float) window_width / (float) window_height;
+    float aspect_ratio_y = (float) window_height / (float) window_width;
+    float fov_y = M_PI / 3.0f; // 60.0 degrees in radians
+    float fov_x = atan(tan(fov_y / 2.0f) * aspect_ratio_x) * 2.0f; // 60.0 degrees in radians
     float z_near = 0.1f;
     float z_far = 100.0f;
-    projection_matrix = mat4_make_perspective(fov, aspect_ratio, z_near, z_far);
+    projection_matrix = mat4_make_perspective(fov_y, aspect_ratio_y, z_near, z_far);
 
     // Initialize frustum planes with a point and a normal
-    init_frustum_planes(fov, z_near, z_far);
+    init_frustum_planes(fov_x, fov_y, z_near, z_far);
 
     // Manually load the hardcoded texture data from the static array
     // mesh_texture = (uint32_t*) REDBRICK_TEXTURE;
