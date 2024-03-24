@@ -2,13 +2,15 @@
 #include <math.h>
 #include "display.h"
 
+#define SCREEN_FACTOR 5
+
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
 static uint32_t* color_buffer = NULL;
 static float* z_buffer = NULL;
 static SDL_Texture* color_buffer_texture = NULL;
-static int window_width = 800;
-static int window_height = 600;
+static int window_width = 320;
+static int window_height = 200;
 static int render_method = 0;
 static int cull_method = 0;
 
@@ -79,16 +81,19 @@ bool initialize_window(void)
     // Set width and height of the SDL window with the max screen resolution
     SDL_DisplayMode display_mode;
     SDL_GetCurrentDisplayMode(0, &display_mode);
-    window_width = display_mode.w;
-    window_height = display_mode.h;
+    int fullscreen_width = display_mode.w;
+    int fullscreen_height = display_mode.h;
+
+    window_width = fullscreen_width / SCREEN_FACTOR;
+    window_height = fullscreen_height / SCREEN_FACTOR;
 
     // Create a SDL Window
     window = SDL_CreateWindow(
             NULL,
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
-            window_width,
-            window_height,
+            fullscreen_width,
+            fullscreen_height,
             SDL_WINDOW_BORDERLESS
     );
     if (!window)

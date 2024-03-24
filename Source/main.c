@@ -48,6 +48,9 @@ void setup(void)
     float z_far = 100.0f;
     projection_matrix = mat4_make_perspective(fov_y, aspect_ratio_y, z_near, z_far);
 
+    // Initialize light
+    init_light(vec3_new(0, 0, 1));
+
     // Initialize frustum planes with a point and a normal
     init_frustum_planes(fov_x, fov_y, z_near, z_far);
 
@@ -324,7 +327,7 @@ void update(void)
             }
 
             // Calculate the shade intensity based on how aligned the face normal and light direction
-            float light_intensity_factor = -vec3_dot(normal, light.direction);
+            float light_intensity_factor = -vec3_dot(normal, get_light_direction());
 
             // Calculate the triangle color based in light angle
             uint32_t triangle_color = light_apply_intensity(mesh_face.color, light_intensity_factor);
