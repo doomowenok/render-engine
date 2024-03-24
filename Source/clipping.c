@@ -67,28 +67,40 @@ void init_frustum_planes(float fov_x, float fov_y, float z_near, float z_far)
 	frustum_planes[FAR_FRUSTUM_PLANE].normal.z = -1;
 }
 
-polygon_t create_polygon_from_triangle(vec3_t v0, vec3_t v1, vec3_t v2)
+polygon_t create_polygon_from_triangle(vec3_t v0, vec3_t v1, vec3_t v2, tex2_t t0, tex2_t t1, tex2_t t2)
 {
 	polygon_t polygon = 
 	{
 		.vertices = {v0, v1, v2},
+        .texture_coords = {t0, t1, t2},
 		.num_vertices = 3
 	};
     return polygon;
 }
+
+float float_lerp(float a, float b, float t)
+{
+    return a + t * (b - a);
+}
+
 
 void clip_polygon_against_plane(polygon_t* polygon, int plane)
 {
 	vec3_t plane_point = frustum_planes[plane].point;
 	vec3_t plane_normal = frustum_planes[plane].normal;
 
-	// Declare a static array of inside verices that will be part of the final polygon returned via parameter 
+	// Declare a static array of inside vertices that will be part of the final polygon returned via parameter
 	vec3_t inside_vertices[MAX_NUM_POLY_VERTICES];
+    tex2_t inside_texture_coords[MAX_NUM_POLY_VERTICES];
 	int num_inside_vertices = 0;
 
-	// Start the current vertex with the first polygon vertex, and the previous with the last polygon vertex 
+	// Start the current vertex with the first polygon vertex and texture coordinate
 	vec3_t* current_vertex = &polygon->vertices[0];
+    tex2_t* current_texture_coord = &polygon->texture_coords[0];
+
+    // Start the previous vertex with the last polygon vertex and texture coordinate
 	vec3_t* previous_vertex = &polygon->vertices[polygon->num_vertices - 1];
+    tex2_t* previous_texture_coord = &polygon->texture_coords[polygon->num_vertices - 1];
 
 	// Calculate the dot product of the current and previous vertex 
 	float current_dot = 0;
@@ -99,41 +111,55 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane)
 	{
 		current_dot = vec3_dot(vec3_sub(*current_vertex, plane_point), plane_normal);
 
-		// If we changed from inside to outside of from outside to inside
+		// If we changed from inside to outside or from outside to inside
 		if(current_dot * previous_dot < 0)
 		{
 			// Find the interpolation factor t
 			float t = previous_dot / (previous_dot - current_dot);
 
 			// Calculate the intersection point I = Q1 + t(Q2 - Q1)
-			vec3_t intersection_point = vec3_clone(current_vertex);						// I =        Qc
-			intersection_point = vec3_sub(intersection_point, *previous_vertex);	// I =  	 (Qc - Qp)
-			intersection_point = vec3_mul(intersection_point, t);						// I = 		t(Qc - Qp)
-			intersection_point = vec3_add(intersection_point, *previous_vertex);	// I = Qp + t(Qc - Qp)
+			vec3_t intersection_point =
+                    {
+                        .x = float_lerp(previous_vertex->x, current_vertex->x, t),
+                        .y = float_lerp(previous_vertex->y, current_vertex->y, t),
+                        .z = float_lerp(previous_vertex->z, current_vertex->z, t),
+                    };
+
+            // Use the linear interpolation formula to get the interpolated U and V texture coordinates
+            tex2_t interpolated_texture_coord =
+                    {
+                        .u = float_lerp(previous_texture_coord->u, current_texture_coord->u, t),
+                        .v = float_lerp(previous_texture_coord->v, current_texture_coord->v, t)
+                    };
 
 			// Insert the intersection point to the list of "inside vertices"
 			inside_vertices[num_inside_vertices] = vec3_clone(&intersection_point);
+            inside_texture_coords[num_inside_vertices] = tex2_clone(&interpolated_texture_coord);
 			num_inside_vertices++;
 		}
 
 		// Current vertex is inside the plane
 		if(current_dot > 0)
 		{
-			// Insert the current vertex to the list of "inside vertices"
+			// Insert the current vertex and texture coordinate to the list of "inside vertices"
 			inside_vertices[num_inside_vertices] = vec3_clone(current_vertex);
+            inside_texture_coords[num_inside_vertices] = tex2_clone(current_texture_coord);
 			num_inside_vertices++;
 		}
 
 		// Move to the next vertex
 		previous_dot = current_dot;
 		previous_vertex = current_vertex;
+        previous_texture_coord = current_texture_coord;
 		current_vertex++;
+        current_texture_coord++;
 	}
 
 	// At the end, opy the list of inside vertices into the destination polygon (out parameter)
 	for(int i = 0; i < num_inside_vertices; i++)
 	{
 		polygon->vertices[i] = vec3_clone(&inside_vertices[i]);
+        polygon->texture_coords[i] = tex2_clone(&inside_texture_coords[i]);
 	}
 
 	polygon->num_vertices = num_inside_vertices;
@@ -162,6 +188,10 @@ void triangles_from_polygon(polygon_t* polygon, triangle_t* triangles_after_clip
 		triangles_after_clipping[i].points[0] = vec4_from_vec3(polygon->vertices[index0]);
 		triangles_after_clipping[i].points[1] = vec4_from_vec3(polygon->vertices[index1]);
 		triangles_after_clipping[i].points[2] = vec4_from_vec3(polygon->vertices[index2]);
+
+        triangles_after_clipping[i].tex_coords[0] = polygon->texture_coords[index0];
+        triangles_after_clipping[i].tex_coords[1] = polygon->texture_coords[index1];
+        triangles_after_clipping[i].tex_coords[2] = polygon->texture_coords[index2];
 	}
 
 	*num_triangles_after_clipping = num_of_triangles;

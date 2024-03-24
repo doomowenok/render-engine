@@ -18,6 +18,7 @@ extern const uint8_t REDBRICK_TEXTURE[];
 extern upng_t* png_texture;
 extern uint32_t* mesh_texture;
 
+tex2_t tex2_clone(tex2_t* t);
 void load_png_texture_data(char* filename);
 
 #endif //RENDERENGINE_TEXTURE_H
