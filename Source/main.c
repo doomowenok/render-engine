@@ -48,16 +48,14 @@ void setup(void)
     float z_far = 100.0f;
     projection_matrix = mat4_make_perspective(fov_y, aspect_ratio_y, z_near, z_far);
 
+    // Initialize camera
+    init_camera(vec3_new(0,0,0), vec3_new(0,0,1));
+
     // Initialize light
     init_light(vec3_new(0, 0, 1));
 
     // Initialize frustum planes with a point and a normal
     init_frustum_planes(fov_x, fov_y, z_near, z_far);
-
-    // Manually load the hardcoded texture data from the static array
-    // mesh_texture = (uint32_t*) REDBRICK_TEXTURE;
-    // texture_width = 64;
-    // texture_height = 64;
 
     // Loads the vertex and face values for the mesh data structure
     // load_cube_mesh_data();5
@@ -128,34 +126,42 @@ void process_input(void)
                 }
                 if (event.key.keysym.sym == SDLK_UP)
                 {
-                    camera.position.y += 3.0f * delta_time;
+                    translate_camera(vec3_new(0, 3.0f * delta_time, 0));
                     break;
                 }
                 if (event.key.keysym.sym == SDLK_DOWN)
                 {
-                    camera.position.y -= 3.0f * delta_time;
+                    translate_camera(vec3_new(0, -3.0f * delta_time, 0));
                     break;
                 }
                 if (event.key.keysym.sym == SDLK_a)
                 {
-                    camera.yaw -= 0.6f * delta_time;
+                    rotate_camera_y(-0.6f * delta_time);
                     break;
                 }
                 if (event.key.keysym.sym == SDLK_d)
                 {
-                    camera.yaw += 0.6f * delta_time;
+                    rotate_camera_y(0.6f * delta_time);
+                    break;
+                }
+                if(event.key.keysym.sym == SDLK_q)
+                {
+                    rotate_camera_x(0.6f * delta_time);
+                    break;
+                }
+                if(event.key.keysym.sym == SDLK_e)
+                {
+                    rotate_camera_x(-0.6f * delta_time);
                     break;
                 }
                 if (event.key.keysym.sym == SDLK_w)
                 {
-                    camera.forward_velocity = vec3_mul(camera.direction, 5.0f * delta_time);
-                    camera.position = vec3_add(camera.position, camera.forward_velocity);
+                    translate_camera_forward(5.0f * delta_time);
                     break;
                 }
                 if (event.key.keysym.sym == SDLK_s)
                 {
-                    camera.forward_velocity = vec3_mul(camera.direction, 5.0f * delta_time);
-                    camera.position = vec3_sub(camera.position, camera.forward_velocity);
+                    translate_camera_forward(-5.0f * delta_time);
                     break;
                 }
                 break;
@@ -195,15 +201,14 @@ void update(void)
 
     // Initialize the target looking at the positive z-axis
     vec3_t target = {0, 0, 1};
-    mat4_t camera_yaw_rotation = mat4_make_rotation_y(camera.yaw);
-    camera.direction = vec3_from_vec4(mat4_mul_vec4(camera_yaw_rotation, vec4_from_vec3(target)));
+    update_camera_direction(target);
 
     // Offset the camera position in the direction where the camera is pointing at
-    target = vec3_add(camera.position, camera.direction);
+    target = vec3_add(get_camera_position(), get_camera_direction());
     vec3_t up_direction = {0, 1, 0};
 
     // Create the view matrix
-    view_matrix = mat4_look_at(camera.position, target, up_direction);
+    view_matrix = mat4_look_at(get_camera_position(), target, up_direction);
 
     // Create a scale, translation and rotation matrices that will be used to multiply the mesh vertices
     mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
@@ -395,7 +400,7 @@ void render(void)
                 triangle.tex_coords[1].u, triangle.tex_coords[1].v, // vertex B
                 triangle.points[2].x, triangle.points[2].y, triangle.points[2].z, triangle.points[2].w,
                 triangle.tex_coords[2].u, triangle.tex_coords[2].v, // vertex C
-                mesh_texture
+                get_mesh_texture()
             );
         }
 
@@ -427,7 +432,7 @@ void render(void)
 ///////////////////////////////////////////////////////////////////////////////
 void free_resources(void)
 {
-    upng_free(png_texture);
+    free_texture();
     array_free(mesh.faces);
     array_free(mesh.vertices);
 }

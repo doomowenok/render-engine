@@ -218,8 +218,8 @@ void draw_texel(int x, int y, uint32_t* texture,
     interpolated_v /= interpolated_reciprocal_w;
 
     // Map the UV coordinate to the full texture width and height
-    int texture_x = abs((int)(interpolated_u * texture_width)) % texture_width;;
-    int texture_y = abs((int)(interpolated_v * texture_height)) % texture_height;
+    int texture_x = abs((int)(interpolated_u * get_texture_width())) % get_texture_width();
+    int texture_y = abs((int)(interpolated_v * get_texture_height())) % get_texture_height();
 
     // Adjust 1/w so the pixels that are closer to the camera have smaller values
     interpolated_reciprocal_w = 1 - interpolated_reciprocal_w;
@@ -228,7 +228,7 @@ void draw_texel(int x, int y, uint32_t* texture,
     if(interpolated_reciprocal_w < get_z_buffer_at(x, y))
     {
         // Draw a pixel at position (x, y) with the color that comes from the mapped texture
-        draw_pixel(x, y, texture[(texture_width * texture_y) + texture_x]);
+        draw_pixel(x, y, texture[(get_texture_width() * texture_y) + texture_x]);
 
         // Update z-buffer value with the 1/w of this current pixel
         update_z_buffer_at(x, y, interpolated_reciprocal_w);

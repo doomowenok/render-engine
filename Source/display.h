@@ -7,6 +7,7 @@
 
 #define FPS 120
 #define FRAME_TARGET_TIME (1000 / FPS)
+#define SCREEN_FACTOR 1
 
 enum cull_method
 {

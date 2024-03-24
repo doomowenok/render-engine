@@ -2,8 +2,6 @@
 #include <math.h>
 #include "display.h"
 
-#define SCREEN_FACTOR 5
-
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
 static uint32_t* color_buffer = NULL;
