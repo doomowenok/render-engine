@@ -58,14 +58,14 @@ void setup(void)
     init_frustum_planes(fov_x, fov_y, z_near, z_far);
 
     //
-    load_mesh("../Assets/Cube.obj",
-              "../Assets/Cube.png",
+    load_mesh("./Assets/Cube.obj",
+              "./Assets/Cube.png",
               vec3_new(1, 1, 1),
               vec3_new(3, 0, 5),
               vec3_new(0, 0, 0));
 
-    load_mesh("../Assets/Cube.obj",
-              "../Assets/Cube.png",
+    load_mesh("./Assets/Cube.obj",
+              "./Assets/Cube.png",
               vec3_new(1, 1, 1),
               vec3_new(-3, 0, 5),
               vec3_new(0, 0, 0));
